@@ -1,0 +1,20 @@
+const mongoose = require("mongoose");
+
+const bookingSchema = new mongoose.Schema(
+  {
+    vehicleId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Vehicle",
+      required: true,
+    },
+    fromPincode: { type: String, required: true },
+    toPincode: { type: String, required: true },
+    startTime: { type: Date },
+    endTime: { type: Date },
+    customerId: { type: String },
+  },
+  { timestamps: true }
+);
+
+const Booking = mongoose.model("Booking", bookingSchema);
+module.exports = Booking;
