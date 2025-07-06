@@ -7,18 +7,17 @@ const createBooking = async (req, res, next) => {
       req.body;
 
     if (!vehicleId || !fromPincode || !toPincode || !startTime || !customerId) {
-      return next({ st: 400, ms: "All fields are required." });
+      return next({ st: 400, error: "All fields are required." });
     }
 
     const vehicle = await Vehicle.findById(vehicleId);
     if (!vehicle) {
-      return next({ st: 404, ms: "Vehicle not found" });
+      return next({ st: 404, error: "Vehicle not found" });
     }
 
     const start = new Date(startTime);
     const from = parseInt(fromPincode);
     const to = parseInt(toPincode);
-
     const estimatedRideDurationHours = Math.abs(to - from) % 24;
 
     const endTime = new Date(start);
@@ -37,7 +36,7 @@ const createBooking = async (req, res, next) => {
     if (isBooked) {
       return next({
         st: 409,
-        ms: "Vehicle is already booked for the selected time slot",
+        error: "Vehicle is already booked for the selected time slot",
       });
     }
 
@@ -53,14 +52,32 @@ const createBooking = async (req, res, next) => {
     await newBooking.save();
 
     res.status(201).json({
-      message: "Booking confirmed",
-      booking: newBooking,
+      data: { message: "Booking confirmed", booking: newBooking },
     });
   } catch (error) {
-    console.error("Booking error:", error);
+    console.log("Booking error:", error);
     next({
       st: 500,
-      ms: error.message || "Internal Server Error",
+      error: error.message || "Internal Server Error",
+    });
+  }
+};
+
+const getBookings = async (req, res, next) => {
+  try {
+    const { customerId } = req.params;
+    const bookings = await Booking.find({ customerId: customerId });
+
+    if (!bookings || bookings.length === 0) {
+      return next({ st: 404, error: "No bookings found for this customer" });
+    }
+
+    res.status(200).json({ data: { bookings } });
+  } catch (error) {
+    console.log("Error fetching bookings:", error);
+    next({
+      st: 500,
+      error: error.message || "Internal Server Error",
     });
   }
 };
@@ -68,17 +85,20 @@ const createBooking = async (req, res, next) => {
 const cancelBooking = async (req, res, next) => {
   try {
     const booking = await Booking.findByIdAndDelete(req.params.id);
+
     if (!booking) {
-      return next({ st: 404, ms: "Booking not found" });
+      return next({ st: 404, error: "Booking not found" });
     }
 
     res.status(200).json({ message: "Booking cancelled successfully" });
-  } catch (err) {
-    next({ st: 500, ms: err.message || "Server Error" });
+  } catch (error) {
+    console.log(error);
+    next({ st: 500, error: error.message || "Server Error" });
   }
 };
 
 module.exports = {
   createBooking,
+  getBookings,
   cancelBooking,
 };

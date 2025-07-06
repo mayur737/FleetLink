@@ -40,18 +40,18 @@ const checkAvailableVehicles = async (req, res, next) => {
     }
 
     const capacity = parseInt(capacityRequired);
-    const from = parseInt(fromPincode);
-    const to = parseInt(toPincode);
     const start = new Date(startTime);
 
-    if (isNaN(capacity) || isNaN(from) || isNaN(to) || isNaN(start.getTime())) {
+    if (isNaN(capacity) || isNaN(start.getTime())) {
       return next({
         st: 400,
         ms: "Invalid parameter types. Ensure all parameters are in correct format.",
       });
     }
 
-    const estimatedRideDurationHours = Math.abs(to - from) % 24;
+    // Simplified ride duration logic
+    const estimatedRideDurationHours =
+      Math.abs(parseInt(toPincode) - parseInt(fromPincode)) % 24;
 
     const endTime = new Date(start);
     endTime.setHours(endTime.getHours() + estimatedRideDurationHours);
@@ -74,10 +74,11 @@ const checkAvailableVehicles = async (req, res, next) => {
     );
 
     res.status(200).json({
-      data: { estimatedRideDurationHours, availableVehicles },
+      estimatedRideDurationHours,
+      availableVehicles,
     });
   } catch (error) {
-    console.error("Availability Check Error:", error);
+    console.log("Availability Check Error:", error);
     next({
       st: 500,
       ms: error.message || "Internal Server Error",

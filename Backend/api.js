@@ -3,8 +3,8 @@ const router = Router();
 const vehicleRoutes = require("./routes/vehicle.route");
 const bookingRoutes = require("./routes/booking.route");
 
-router.use("/vehicle", [json(), vehicleRoutes]);
-router.use("/booking", [json(), bookingRoutes]);
+router.use("/vehicles", [json(), vehicleRoutes]);
+router.use("/bookings", [json(), bookingRoutes]);
 
 router.use("*", (_, res) => {
   res.status(404).json({ error: "Not Found ❌" });

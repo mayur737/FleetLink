@@ -7,6 +7,6 @@ const {
 const router = express.Router();
 
 router.post("/", addVehicle);
-router.get("/", checkAvailableVehicles);
+router.get("/available", checkAvailableVehicles);
 
 module.exports = router;
